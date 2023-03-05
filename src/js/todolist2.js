@@ -1,50 +1,93 @@
-import localStore from '../js-modules/local-save-service';
+import { nanoid } from "nanoid";
 
 const refs = {
-    input: document.querySelector('.textarea'),
-    btn: document.querySelector('.buttoninput'),
-    list: document.querySelector('.todolist'),
+    todoForm: document.querySelector('.todo-form'),
+    todoInput: document.querySelector('.todo-input'),
+    todoListItems: document.querySelector('.todo-items'),
 };
 
-const STORAGE_KEY = 'TODO_LIST_ITEMS';
+refs.todoForm.addEventListener('submit', submitForm);
+refs.todoListItems.addEventListener('click', toggleOrDeleteTask);
 
-refs.btn.addEventListener('click', onAddTask);
-refs.list.addEventListener('click', checkOrDelTask);
+let tasks = [];
 
-function onAddTask(e) {
+function submitForm(e) {
     e.preventDefault();
-    addTask();
+    addTodo(refs.todoInput.value);
+    refs.todoInput.value = '';
 };
 
-function addTask() {
-    const items = [];
-    const inputValue = refs.input.value;
-    if (inputValue) {
-        items.push({ value: inputValue })
-        const taskMarkup = items.map(item => {
-            return `
-        <div class="itemall">
-            <p class="item">${item.value}</p>
-            <button class="check-button">
-                <i class="fa-solid fa-check"></i>
-            </button>
-            <button class="trash-button">
-                <i class="fa-solid fa-trash"></i>
-            </button>
-        </div>
-    `
-        }).join('');
-        refs.list.insertAdjacentHTML('beforeend', taskMarkup);
+function addTodo(item) {
+    if (item) {
+        const task = { id: nanoid(), value: item, done: false };
+
+        tasks.push(task);
+        addToLocalStorage(tasks);
     };
 };
 
+function renderTasks(tasks) {
+    refs.todoListItems.innerHTML = '';
+    tasks.forEach(item => { 
+    const checked = item.done ? 'checked' : null;
+    
+        const li = document.createElement('li');
+        li.setAttribute('class', 'item');
+        li.setAttribute('data-id', item.id);
 
-function checkOrDelTask(e) {
-    const item = e.target;
+        if (item.done === true) { 
+            li.classList.add('checked'); 
+        };
 
-    if (item.classList.value === 'check-button') {
-        item.parentElement.classList.add('checklist')
-    } else if (item.classList.value === 'trash-button') {
-        item.parentElement.remove();
+        li.innerHTML = ` 
+            <input type="checkbox" class="checkbox" ${checked}> 
+            ${item.value} 
+            <button class="delete-button">X</button> 
+        `; 
+    refs.todoListItems.append(li); 
+    });
+};
+
+function addToLocalStorage(tasks) {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    renderTasks(tasks);
+};
+
+function getFromLocalStorage() {
+    const refs = localStorage.getItem('tasks');
+    if (refs) {
+        tasks = JSON.parse(refs);
+        renderTasks(tasks);
     };
+};
+
+getFromLocalStorage();
+
+function toggleOrDeleteTask(e) {
+    if (e.target.type === 'checkbox') {
+        toggle(e.target.parentElement.getAttribute('data-id'));
+    };
+    if (e.target.classList.contains('delete-button')) {
+        deleteTask(e.target.parentElement.getAttribute('data-id'))
+    };
+};
+
+function toggle(id) {
+
+    tasks.forEach(item => {
+        if (id === item.id) {
+            item.done = !item.done;
+        };
+    });
+    addToLocalStorage(tasks);
+};
+
+function deleteTask(id) {
+    tasks = tasks.filter(item => {
+        // return item.id != id;
+        if (item.id !== id) {
+            return item.id;
+        };
+    })
+    addToLocalStorage(tasks);
 };
