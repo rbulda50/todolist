@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import localStore from './js-modules/local-save-service';
+import localStore from '../js-modules/local-save-service';
 
 class TodoList {
     #STORAGE_KEY = 'TODO_LIST_ITEMS';
@@ -24,7 +24,8 @@ class TodoList {
     #items = localStore.load(this.#STORAGE_KEY) || [];
 
     init(targetNode) {
-        const targetElement = targetNode || document.body;
+        const tasksContainer = document.querySelector('.tasks')
+        const targetElement = targetNode || tasksContainer;
         targetElement.innerHTML = this.#appMarkup;
 
         this.#defineRefs();
