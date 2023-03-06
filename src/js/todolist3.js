@@ -31,7 +31,7 @@ let tasks = [];
 
 function onFormSubmit(e) {
     e.preventDefault();
-    addTodo(refs.inputForm.value);
+    addTodo(refs.inputForm.value.trim());
     refs.inputForm.value = '';
 };
 
