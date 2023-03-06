@@ -10,6 +10,10 @@ body {
     font-family: sans-serif;
 }
 
+.link-home {
+    margin-top: 30px;
+}
+
 button:hover {
     cursor: pointer;
     background-color: #73E831;
